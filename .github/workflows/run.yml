@@ -37,4 +37,4 @@ jobs:
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
           USER_EMAIL: ${{ secrets.USER_EMAIL }}
         run: |
-          node ../index.js
+          node index.js
