@@ -17,7 +17,7 @@ function getAccount() {
 async function ensureLogin(accountInfo,page,cookies) {
     // 写入cookie
     // const cookies = require("./cookies.json");
-
+    console.log(`${accountInfo.account}准备登录`);
     const curCookies=cookies[accountInfo.account];
     if (Array.isArray(curCookies) && curCookies.length > 0) {
         //执行操作
@@ -218,8 +218,8 @@ async function execAutoTask(accountInfo,cookies) {
         await goPlayPage(page);
 
         console.log("准备签到");
-        await sign(page);
-        await autoLuckDraw(page);
+        // await sign(page);
+        // await autoLuckDraw(page);
         await autoBugFix(page);
 
 
