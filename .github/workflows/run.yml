@@ -1,0 +1,40 @@
+name: 签到
+permissions:
+  contents: write
+on:
+  schedule:
+    # 执行两次 避免偶尔执行失败的情况出现
+    - cron: "15 22 * * *"
+    - cron: "30 03 * * *"
+  push:
+    branches:
+      - main
+      - master
+
+  # pull_request:
+  # branches: [ master,main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # if: github.event.repository.owner.id == github.event.sender.id
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: npm包安装
+        run: npm ci
+      - name: 开始任务
+        env:
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          USER_MOBILE: ${{ secrets.USER_MOBILE }}
+          USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+        run: |
+          node index.js
