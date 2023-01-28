@@ -3,10 +3,10 @@ const puppeteer = require('puppeteer');
 const _ = require('lodash');
 
 const DEFAULT_CREATE_OPTIONS = {
-    headless: true,
+    headless: false,
     timeout: 3000,
     slowMo: 10,
-    ignoreDefaultArgs: ['--enable-automation'],
+    ignoreDefaultArgs: ['--enable-automation','--disable-extensions'],
     args: ['--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-features=site-per-process',
