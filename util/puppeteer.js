@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const _ = require('lodash');
 
 const DEFAULT_CREATE_OPTIONS = {
-    headless: false,
+    headless: true,
     timeout: 3000,
     slowMo: 10,
     ignoreDefaultArgs: ['--enable-automation','--disable-extensions'],
