@@ -51,7 +51,7 @@ async function ensureLogin(accountInfo,page,cookies) {
     await page.type('.auth-modal-box .account-input', accountInfo.account, {
         delay: 100
     });
-
+    //
     await page.type('.auth-modal-box [name="loginPassword"]', config.user.password, {
         delay: 100
     });
@@ -111,6 +111,10 @@ async function sign(page) {
     classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
     if (classValue.indexOf('signedin') >= 0) {
         console.log('签到成功')
+        await page.waitForTimeout(3000);
+        let closeBtn = await page.$('.success-modal .byte-modal__headerbtn');
+        closeBtn.click();
+        await page.waitForTimeout(1000);
     } else {
         console.log('签到失败')
     }
@@ -218,9 +222,9 @@ async function execAutoTask(accountInfo,cookies) {
         await goPlayPage(page);
 
         console.log("准备签到");
-        // await sign(page);
-        // await autoLuckDraw(page);
-        await autoBugFix(page);
+        await sign(page);
+        await autoLuckDraw(page);
+        // await autoBugFix(page);
 
 
     } catch (err) {
