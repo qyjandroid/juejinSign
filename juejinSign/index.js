@@ -52,7 +52,7 @@ async function ensureLogin(accountInfo,page,cookies) {
         delay: 100
     });
     //
-    await page.type('.auth-modal-box [name="loginPassword"]', config.user.password, {
+    await page.type('.auth-modal-box [name="loginPassword"]',config.user.password , {
         delay: 100
     });
     // 点击登录
@@ -219,7 +219,7 @@ async function execAutoTask(accountInfo,cookies) {
         // 确保登录
         await ensureLogin(accountInfo,page,cookies);
         // 去钻石页面
-        await goPlayPage(page);
+        // await goPlayPage(page);
 
         console.log("准备签到");
         await sign(page);
