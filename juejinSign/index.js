@@ -224,8 +224,8 @@ async function execAutoTask(accountInfo,cookies) {
         console.log("准备签到");
         await sign(page);
         await autoLuckDraw(page);
-        // await autoBugFix(page);
-
+        await autoBugFix(page);
+        await page.waitForTimeout(2000);
 
     } catch (err) {
         console.log('ensureLogin error:', err);
