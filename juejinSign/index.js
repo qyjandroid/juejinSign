@@ -95,19 +95,7 @@ async function goPlayPage(page) {
     console.log('等待跳转：结束');
 }
 
-/**
- * 
- * 获取className
- * @param {any} page 
- * @param {any} classSelect 
- * @returns 
- */
-async function getClassNames(page,classSelect) {
-    return await page.evaluate( ()=>{
-      const single = document.querySelector(classSelect);
-       return single.className;
-    } )
-}
+
 
 // 可以直接走接口判断
 async function sign(page) {
@@ -115,15 +103,14 @@ async function sign(page) {
     await page.waitForTimeout(3000);
 
     let signBtn = await page.$('.signin .code-calender .btn');
-    let classValue = await getClassNames(page,".signin .code-calender .btn");
-    // let classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
+    let classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
+    console.log("className==",classValue);
     if (classValue.indexOf('signedin') >= 0) {
         return console.log('今日已签到，无需签到')
     }
     await signBtn.click();
     await page.waitForTimeout(3000)
-    classValue = await getClassNames(page,".signin .code-calender .btn");
-    // classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
+    classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
     if (classValue.indexOf('signedin') >= 0) {
         console.log('签到成功')
         await page.waitForTimeout(3000);
@@ -236,7 +223,7 @@ async function execAutoTask(accountInfo,cookies) {
         // 确保登录
         await ensureLogin(accountInfo,page,cookies);
         // 去钻石页面
-        // await goPlayPage(page);
+        await goPlayPage(page);
 
         console.log("准备签到");
         await sign(page);
