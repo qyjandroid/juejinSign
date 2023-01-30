@@ -103,7 +103,7 @@ async function goPlayPage(page) {
  * @returns 
  */
 async function getClassNames(page,classSelect) {
-    return await page.evaluate( function (){
+    return await page.evaluate( ()=>{
       const single = document.querySelector(classSelect);
        return single.className;
     } )
