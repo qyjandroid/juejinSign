@@ -1,10 +1,9 @@
 name: 签到
-permissions:
-  contents: write
+permissions: write-all
 on:
   schedule:
     # 执行两次 避免偶尔执行失败的情况出现
-    - cron: "15 22 * * *"
+    - cron: "15 12 * * *"
     - cron: "30 03 * * *"
   push:
     branches:
