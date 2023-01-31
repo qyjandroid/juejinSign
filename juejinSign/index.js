@@ -52,7 +52,7 @@ async function ensureLogin(accountInfo,page,cookies) {
         delay: 100
     });
     //
-    await page.type('.auth-modal-box [name="loginPassword"]',"QUAN654123yj" , {
+    await page.type('.auth-modal-box [name="loginPassword"]',config.user.password , {
         delay: 100
     });
     // 点击登录
