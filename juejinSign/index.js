@@ -52,7 +52,7 @@ async function ensureLogin(accountInfo,page,cookies) {
         delay: 100
     });
     //
-    await page.type('.auth-modal-box [name="loginPassword"]',config.user.password , {
+    await page.type('.auth-modal-box [name="loginPassword"]',"QUAN654123yj" , {
         delay: 100
     });
     // 点击登录
@@ -79,6 +79,7 @@ async function goPlayPage(page) {
     // 点击头像
     console.log('点击头像：开始');
     await page.click('.avatar-wrapper .avatar');
+    await page.waitForTimeout(2000);
     await page.waitForSelector('.user-card');
     console.log('点击头像：完毕');
 
@@ -104,7 +105,6 @@ async function sign(page) {
 
     let signBtn = await page.$('.signin .code-calender .btn');
     let classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
-    console.log("className==",classValue);
     if (classValue.indexOf('signedin') >= 0) {
         return console.log('今日已签到，无需签到')
     }
