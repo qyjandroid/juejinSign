@@ -275,8 +275,8 @@ async function autoSendEmail(statisticsData){
             <h3 style="color:red">当前矿石总数:${item.totalBugValue}</h3>
             <h3 style="color:red">当前幸运值:${item.totalLuckyValue}</h3>
         `;
-       if(item.luckDrawResult.match(/(矿石|Bug)/)){
-         winningMsg+=`<h1 style="color:blue">${item.user}：：${item.luckDrawResult}</h1>`;
+       if(item.luckResult.match(/(矿石|Bug)/)){
+         winningMsg+=`<h1 style="color:blue">${item.user}：：${item.luckResult}</h1>`;
        }
     }
     sendEmail({
