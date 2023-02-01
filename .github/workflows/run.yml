@@ -1,5 +1,6 @@
 name: 签到
-permissions: write-all
+permissions: 
+  contents: write
 on:
   schedule:
     # 执行两次 避免偶尔执行失败的情况出现
@@ -31,9 +32,14 @@ jobs:
         run: npm ci
       - name: 开始任务
         env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
-          USER_MOBILE: ${{ secrets.USER_MOBILE }}
           USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
           USER_EMAIL: ${{ secrets.USER_EMAIL }}
         run: |
           node index.js
+      - name: 更新数据
+        uses: JamesIves/github-pages-deploy-action@4.0.0
+        with:
+          branch: main
+          folder: .

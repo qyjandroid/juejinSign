@@ -3,6 +3,9 @@ const { createPage } = require("../util/puppeteer");
 const { URLS } = require("./const");
 const { autoSlideAndCookie } = require("./autoSlider");
 const config = require('../config/index');
+const { sendEmail } = require('./util/email');
+
+let htmlTempData=[];
 
 async function checkIsLogin(page) {
     const loginBtn = await page.$(".login-button");
@@ -91,8 +94,8 @@ async function goPlayPage(page) {
 
     // 等待跳转
     console.log('等待跳转：开始');
-    await page.waitForResponse('https://juejin.cn/user/center/signin?avatar_menu');
-    await page.waitForTimeout(3000);
+    // await page.waitForResponse('https://juejin.cn/user/center/signin?avatar_menu');
+    await page.waitForTimeout(8000);
     console.log('等待跳转：结束');
 }
 
@@ -106,7 +109,8 @@ async function sign(page) {
     let signBtn = await page.$('.signin .code-calender .btn');
     let classValue = await page.$eval(".signin .code-calender .btn", el => el.className);
     if (classValue.indexOf('signedin') >= 0) {
-        return console.log('今日已签到，无需签到')
+        console.log('今日已签到，无需签到')
+        return "已签到"
     }
     await signBtn.click();
     await page.waitForTimeout(3000)
@@ -117,9 +121,11 @@ async function sign(page) {
         let closeBtn = await page.$('.success-modal .byte-modal__headerbtn');
         closeBtn.click();
         await page.waitForTimeout(1000);
-    } else {
-        console.log('签到失败')
+        return "签到成功"
     }
+    console.log('签到失败')
+    return "签到失败"
+  
 }
 
 
@@ -128,10 +134,14 @@ async function autoLuckDraw(page){
     await page.waitForTimeout(1000);
     let menus=await page.$$('.menu.byte-menu a');
     menus[2].click();
-    // await page.waitForResponse('https://juejin.cn/user/center/lottery?from=lucky_lottery_menu_bar');
     await page.waitForTimeout(6000);
 
     console.log("跳转到抽奖界面");
+
+    let result={
+        luckDrawResult:"",
+        happyLotResult:"",
+    };
 
     let freeLottery=await page.$('.turntable-item.lottery .text-free');
     if(freeLottery){
@@ -141,10 +151,13 @@ async function autoLuckDraw(page){
         let submitBtn=await page.$('.byte-modal__body .submit');
         if(submitBtn){
             submitBtn.click();
-            console.log("抽奖成功")
+            let luckDrawContent=await page.$eval('.lottery_modal .byte-modal__body .title',el=>el.innerHTML);
+            console.log(`抽奖成功-${luckDrawContent}`);
+            result.luckDrawResult=`抽奖成功-${luckDrawContent}`;
         }
     }else{
         console.log("已抽奖")
+        result.luckDrawResult="已抽奖";
     }
     //沾喜气按钮
     let festivityBtn=await page.$$('svg.stick-btn');
@@ -155,9 +168,39 @@ async function autoLuckDraw(page){
         blessingBtn.click();
     }
     console.log("已沾福气")
+    result.happyLotResult="已沾福气";
+    return result;
     
 }
 
+/**
+ * 
+ * 获取当前总幸运值
+ * @param {any} page 
+ */
+async function getTotalLuckyValue(page){
+    await page.waitForTimeout(1000);
+    let totalLuckyValue = await page.$eval('#progress-wrap .current-value',el=>el.innerHTML);
+    console.log("获取到的当前幸运值：",totalLuckyValue);
+    return totalLuckyValue;
+}
+
+/**
+ * 
+ * 当前矿石总数
+ * @param {any} page 
+ * @returns 
+ */
+async function getTotalOre(page){
+    await page.waitForTimeout(2000);
+    let menus=await page.$$('.menu.byte-menu a');
+    menus[0].click();
+    await page.waitForTimeout(6000);
+    //当前拥有的矿石数量
+    let figureValue = await page.$$eval('.figures .figure',domsArr=>{return domsArr[domsArr.length-1].innerHTML});
+    console.log("获取的总数：：",figureValue)
+    return figureValue;
+}
 
 
 async function autoBugFix(page){
@@ -176,11 +219,10 @@ async function autoBugFix(page){
     }else{
         console.log(`准备收集bug`);
     }
-
-    await collectBug(page);
+   return await collectBug(page,0);
 }
 
-async function collectBug(page){
+async function collectBug(page,totalBugValue){
     await page.waitForTimeout(6000);
     let bugs=await page.$$('.item.bug-item-web');
     if(bugs && bugs.length>0){
@@ -190,29 +232,72 @@ async function collectBug(page){
             await page.waitForTimeout(1000);
         }
         console.log(`收取bug${bugs.length}`);
-        await collectBug(page);
+        totalBugValue+=bugs.length;
+        await collectBug(page,totalBugValue);
     }else{
         console.log("暂无bug");
     }
+    return totalBugValue;
 }
 
 async function autoAutoHappy() {
     const cookies = require("./cookies.json");
     //获取所有的账号
     const accounts = getAccount();
+    htmlTempData=[];
     if(accounts){
         const accountArray=Object.keys(accounts);
         for(let i=0;i<accountArray.length;i++){
             const account=accountArray[i];
             const accountInfo=accounts[account];
-            await execAutoTask(accountInfo,cookies);
+            const statisticsResult=  await execAutoTask(accountInfo,cookies);
+            htmlTempData.push(statisticsResult);
         }
     }
+    autoSendEmail(htmlTempData);
+}
+
+async function autoSendEmail(statisticsData){
+    let htmlStr="";
+    let winningMsg="";
+    for(let i=0;i<statisticsData.length;i++){
+        const item=statisticsData[i];
+        htmlStr+="<div>-----------------------------------------------</div>";
+        htmlStr+=`
+            <h1>
+                用户:${item.user}
+            </h1>
+            <h3>签到状态:${item.signResult}</h3>
+            <h3>抽奖结果:${item.luckResult}</h3>
+            <h3>沾福气结果:${item.happyLotResult}</h3>
+            <h3>bug收集数量:${item.bugFix}</h3>
+
+            <h3 style="color:red">当前矿石总数:${item.totalBugValue}</h3>
+            <h3 style="color:red">当前幸运值:${item.totalLuckyValue}</h3>
+        `;
+       if(item.luckDrawResult.match(/(矿石|Bug)/)){
+         winningMsg+=`<h1 style="color:blue">${item.user}：：${item.luckDrawResult}</h1>`;
+       }
+    }
+    sendEmail({
+        to: config.user.email,
+        html: winningMsg+htmlStr,
+        subject: winningMsg?'【掘金】中奖':'【掘金】自动化结果'
+    });
 }
 
 
 async function execAutoTask(accountInfo,cookies) {
-    let browser
+    let browser;
+    let userResult={
+        user:accountInfo.account,
+        signResult:"",
+        luckResult:"",
+        happyLotResult:"",
+        bugFix:0,
+        totalOre:0,
+        totalLuckyValue:0
+    };
     try {
         let pInfo = await createPage({
             headless: true,
@@ -226,9 +311,23 @@ async function execAutoTask(accountInfo,cookies) {
         await goPlayPage(page);
 
         console.log("准备签到");
-        await sign(page);
-        await autoLuckDraw(page);
-        await autoBugFix(page);
+        const signResult=await sign(page);
+        userResult.signResult=signResult;
+        const luckDrawResult=await autoLuckDraw(page);
+        if(luckDrawResult){
+            userResult.luckResult=luckDrawResult.luckDrawResult;
+            userResult.happyLotResult=luckDrawResult.happyLotResult;
+        }
+        //当前幸运值
+        const totalLuckyValue=await getTotalLuckyValue(page);
+        userResult.totalLuckyValue=totalLuckyValue;
+        //收集bug
+        const bugFixResult=await autoBugFix(page);
+        userResult.bugFix=bugFixResult;
+
+        //获取总矿石
+        const totalOreValue=await getTotalOre(page);
+        userResult.totalOre=totalOreValue;
         await page.waitForTimeout(2000);
 
     } catch (err) {
@@ -237,6 +336,7 @@ async function execAutoTask(accountInfo,cookies) {
         if (browser && browser.isConnected) {
             await browser.close();
         }
+        return userResult;
     }
 }
 
