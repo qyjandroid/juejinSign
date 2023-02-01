@@ -272,7 +272,7 @@ async function autoSendEmail(statisticsData){
             <h3>沾福气结果:${item.happyLotResult}</h3>
             <h3>bug收集数量:${item.bugFix}</h3>
 
-            <h3 style="color:red">当前矿石总数:${item.totalBugValue}</h3>
+            <h3 style="color:red">当前矿石总数:${item.totalOre}</h3>
             <h3 style="color:red">当前幸运值:${item.totalLuckyValue}</h3>
         `;
        if(item.luckResult.match(/(矿石|Bug)/)){
