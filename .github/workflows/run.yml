@@ -4,8 +4,8 @@ permissions:
 on:
   schedule:
     # 执行两次 避免偶尔执行失败的情况出现
-    - cron: "15 12 * * *"
-    - cron: "30 03 * * *"
+    - cron: "11 12 * * *"
+    - cron: "34 01 * * *"
   push:
     branches:
       - main
