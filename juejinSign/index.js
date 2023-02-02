@@ -153,7 +153,7 @@ async function autoLuckDraw(page){
             submitBtn.click();
             let luckDrawContent=await page.$eval('.lottery_modal .byte-modal__body .title',el=>el.innerHTML);
             console.log(`抽奖成功-${luckDrawContent}`);
-            result.luckDrawResult=`抽奖成功-${luckDrawContent}`;
+            result.luckDrawResult=`${luckDrawContent}`;
         }
     }else{
         console.log("已抽奖")
@@ -275,7 +275,7 @@ async function autoSendEmail(statisticsData){
             <h3 style="color:red">当前矿石总数:${item.totalOre}</h3>
             <h3 style="color:red">当前幸运值:${item.totalLuckyValue}</h3>
         `;
-       if(item.luckResult.match(/(矿石|Bug)/)){
+       if(!item.luckResult.match(/(矿石|彩蛋|抽奖)/)){
          winningMsg+=`<h1 style="color:blue">${item.user}：：${item.luckResult}</h1>`;
        }
     }
